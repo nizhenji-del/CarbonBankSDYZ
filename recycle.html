@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 登记回收 — 瓶碳银行</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <script>tailwind.config={theme:{extend:{colors:{eco:{50:'#f0fdf4',100:'#dcfce7',200:'#bbf7d0',300:'#86efac',400:'#4ade80',500:'#22c55e',600:'#16a34a',700:'#15803d',800:'#166534',900:'#14532d'}}}}}</script>
+</head>
+<body class="bg-gradient-to-br from-eco-50 via-white to-eco-50 min-h-screen">
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
+
+    <!-- 顶部导航 -->
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40 border-b border-eco-100">
+        <div class="max-w-6xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-3xl">🌿</span>
+                    <div>
+                        <h1 class="text-xl font-bold text-eco-800 leading-tight">瓶碳银行</h1>
+                        <p class="text-xs text-eco-600">PET瓶 × PP碗 双轨碳积分回收系统</p>
+                    </div>
+                </div>
+                <div class="hidden sm:flex items-center gap-2 text-xs text-eco-600 bg-eco-50 px-3 py-1.5 rounded-full">
+                    <span class="w-2 h-2 bg-eco-500 rounded-full animate-pulse"></span>
+                    <span>实时同步</span>
+                </div>
+            </div>
+            <nav class="flex gap-1 overflow-x-auto pb-1 -mb-3" id="tab-nav">
+                <a href="recycle.html"  data-tab="recycle"  class="tab-btn px-3 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors no-underline">📝 登记回收</a>
+                <a href="ranking.html"  data-tab="ranking"  class="tab-btn px-3 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors no-underline">🏆 排行榜</a>
+                <a href="records.html"  data-tab="records"  class="tab-btn px-3 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors no-underline">📋 回收流水</a>
+                <a href="students.html" data-tab="students" class="tab-btn px-3 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors no-underline">👥 学生管理</a>
+                <a href="carbon.html"   data-tab="carbon"   class="tab-btn px-3 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors no-underline">📊 碳减排</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- 左侧：登记表单 -->
+            <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-eco-100 p-6 animate-slide-up">
+                <h2 class="text-lg font-bold text-eco-800 mb-5 flex items-center gap-2">
+                    <span class="w-8 h-8 bg-eco-100 rounded-lg flex items-center justify-center text-lg">📝</span>
+                    登记回收
+                </h2>
+
+                <!-- 学生选择 -->
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">选择学生</label>
+                    <select id="recycle-student" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-eco-400 focus:border-eco-400 transition-all bg-gray-50 hover:bg-white text-sm">
+                        <option value="">-- 请选择学生 --</option>
+                    </select>
+                </div>
+
+                <!-- 品类切换 -->
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">回收品类</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="switchCategory('PET')" id="cat-pet" class="category-btn active px-4 py-3 rounded-xl border-2 border-eco-200 text-sm font-semibold flex items-center justify-center gap-2">🍶 PET瓶</button>
+                        <button onclick="switchCategory('PP')" id="cat-pp" class="category-btn px-4 py-3 rounded-xl border-2 border-gray-200 text-sm font-semibold flex items-center justify-center gap-2 text-gray-600">🥣 PP碗</button>
+                    </div>
+                </div>
+
+                <!-- 数量 -->
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">回收数量</label>
+                    <div class="flex items-center gap-3">
+                        <button onclick="adjustQty(-1)" class="w-10 h-10 rounded-xl bg-gray-100 hover:bg-eco-100 text-gray-600 hover:text-eco-700 font-bold text-lg transition-colors">−</button>
+                        <input type="number" id="recycle-qty" value="1" min="1" max="999" class="w-20 text-center px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-eco-400 text-lg font-bold" onchange="updatePreview()">
+                        <button onclick="adjustQty(1)" class="w-10 h-10 rounded-xl bg-gray-100 hover:bg-eco-100 text-gray-600 hover:text-eco-700 font-bold text-lg transition-colors">+</button>
+                    </div>
+                </div>
+
+                <!-- PET 附加选项 -->
+                <div id="bonus-pet" class="mb-5">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">附加加分</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <label class="bonus-label flex items-center gap-2 px-3 py-2.5 border border-gray-200 rounded-xl cursor-pointer hover:border-eco-300 transition-all">
+                            <input type="checkbox" id="bonus-cleaned" class="accent-eco-500 w-4 h-4" onchange="updatePreview()">
+                            <span class="text-sm">💧 已清洗 <b class="text-eco-600">+5</b></span>
+                        </label>
+                        <label class="bonus-label flex items-center gap-2 px-3 py-2.5 border border-gray-200 rounded-xl cursor-pointer hover:border-eco-300 transition-all">
+                            <input type="checkbox" id="bonus-flattened" class="accent-eco-500 w-4 h-4" onchange="updatePreview()">
+                            <span class="text-sm">🫧 已压扁 <b class="text-eco-600">+3</b></span>
+                        </label>
+                        <label class="bonus-label flex items-center gap-2 px-3 py-2.5 border border-gray-200 rounded-xl cursor-pointer hover:border-eco-300 transition-all">
+                            <input type="checkbox" id="bonus-capped" class="accent-eco-500 w-4 h-4" onchange="updatePreview()">
+                            <span class="text-sm">🔴 瓶盖分离 <b class="text-eco-600">+2</b></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- PP 附加选项 -->
+                <div id="bonus-pp" class="mb-5 hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">附加加分</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <label class="bonus-label flex items-center gap-2 px-3 py-2.5 border border-gray-200 rounded-xl cursor-pointer hover:border-eco-300 transition-all">
+                            <input type="checkbox" id="bonus-cleaned-pp" class="accent-eco-500 w-4 h-4" onchange="updatePreview()">
+                            <span class="text-sm">💧 已清洗 <b class="text-eco-600">+8</b></span>
+                        </label>
+                        <label class="bonus-label flex items-center gap-2 px-3 py-2.5 border border-gray-200 rounded-xl cursor-pointer hover:border-eco-300 transition-all">
+                            <input type="checkbox" id="bonus-stacked" class="accent-eco-500 w-4 h-4" onchange="updatePreview()">
+                            <span class="text-sm">📚 叠放整齐 <b class="text-eco-600">+3</b></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 积分预估 -->
+                <div class="flex items-center justify-between bg-gradient-to-r from-eco-50 to-green-50 rounded-xl p-4 mb-5">
+                    <div>
+                        <p class="text-xs text-eco-600 mb-0.5">本次预估积分</p>
+                        <p class="text-3xl font-bold text-eco-700" id="preview-points">10</p>
+                    </div>
+                    <div class="text-right text-xs text-eco-600">
+                        <p id="preview-detail">基础 10分 × 1个</p>
+                    </div>
+                </div>
+
+                <button onclick="submitRecycle()" id="submit-btn" class="w-full py-3 bg-gradient-to-r from-eco-500 to-eco-600 hover:from-eco-600 hover:to-eco-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg active:scale-[0.98] transition-all text-sm">
+                    ✅ 提交回收记录
+                </button>
+            </div>
+
+            <!-- 右侧：今日统计 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-eco-100 p-6 animate-slide-up" style="animation-delay:0.1s">
+                <h2 class="text-lg font-bold text-eco-800 mb-5 flex items-center gap-2">
+                    <span class="w-8 h-8 bg-eco-100 rounded-lg flex items-center justify-center text-lg">📊</span>
+                    今日统计
+                </h2>
+                <div class="space-y-4">
+                    <div class="bg-blue-50 rounded-xl p-4 flex items-center gap-3">
+                        <span class="text-2xl">🍶</span>
+                        <div><p class="text-xs text-blue-600">PET瓶</p><p class="text-2xl font-bold text-blue-700" id="today-pet">0</p></div>
+                    </div>
+                    <div class="bg-orange-50 rounded-xl p-4 flex items-center gap-3">
+                        <span class="text-2xl">🥣</span>
+                        <div><p class="text-xs text-orange-600">PP碗</p><p class="text-2xl font-bold text-orange-700" id="today-pp">0</p></div>
+                    </div>
+                    <div class="bg-eco-50 rounded-xl p-4 flex items-center gap-3">
+                        <span class="text-2xl">🌍</span>
+                        <div><p class="text-xs text-eco-600">预估碳减排</p><p class="text-2xl font-bold text-eco-700"><span id="today-co2">0.00</span> <span class="text-sm font-normal">kg CO₂</span></p></div>
+                    </div>
+                    <div class="bg-purple-50 rounded-xl p-4 flex items-center gap-3">
+                        <span class="text-2xl">♻️</span>
+                        <div><p class="text-xs text-purple-600">今日总回收</p><p class="text-2xl font-bold text-purple-700"><span id="today-total">0</span> <span class="text-sm font-normal">件</span></p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center py-6 text-xs text-gray-400">🌿 瓶碳银行 v1.0 — 让每一次回收都被看见</footer>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/recycle.js"></script>
+</body>
+</html>

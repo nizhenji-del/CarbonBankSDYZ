@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌿 瓶碳银行 — 碳积分回收系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <script>tailwind.config={theme:{extend:{colors:{eco:{50:'#f0fdf4',100:'#dcfce7',200:'#bbf7d0',300:'#86efac',400:'#4ade80',500:'#22c55e',600:'#16a34a',700:'#15803d',800:'#166534',900:'#14532d'}}}}}</script>
+</head>
+<body class="bg-gradient-to-br from-eco-50 via-white to-eco-50 min-h-screen">
+
+    <!-- Toast 通知 -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
+
+    <!-- ========== 顶部导航 ========== -->
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40 border-b border-eco-100">
+        <div class="max-w-6xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-3xl">🌿</span>
+                    <div>
+                        <h1 class="text-xl font-bold text-eco-800 leading-tight">瓶碳银行</h1>
+                        <p class="text-xs text-eco-600">PET瓶 × PP碗 双轨碳积分回收系统</p>
+                    </div>
+                </div>
+                <div class="hidden sm:flex items-center gap-2 text-xs text-eco-600 bg-eco-50 px-3 py-1.5 rounded-full">
+                    <span class="w-2 h-2 bg-eco-500 rounded-full animate-pulse"></span>
+                    <span>实时同步</span>
+                </div>
+            </div>
+            <nav class="flex gap-1 overflow-x-auto pb-1 -mb-3" id="tab-nav">
+                <a href="recycle.html"  data-tab="recycle"  class="tab-btn px-3 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors no-underline">📝 登记回收</a>
+                <a href="ranking.html"  data-tab="ranking"  class="tab-btn px-3 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors no-underline">🏆 排行榜</a>
+                <a href="records.html"  data-tab="records"  class="tab-btn px-3 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors no-underline">📋 回收流水</a>
+                <a href="students.html" data-tab="students" class="tab-btn px-3 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors no-underline">👥 学生管理</a>
+                <a href="carbon.html"   data-tab="carbon"   class="tab-btn px-3 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors no-underline">📊 碳减排</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-16">
+        <div class="text-center animate-fade-in">
+            <div class="text-6xl mb-6">🌿</div>
+            <h2 class="text-3xl font-bold text-eco-800 mb-3">欢迎来到瓶碳银行</h2>
+            <p class="text-gray-500 mb-10">PET瓶 × PP碗 双轨碳积分回收系统</p>
+            <a href="recycle.html" class="inline-block px-8 py-3 bg-gradient-to-r from-eco-500 to-eco-600 hover:from-eco-600 hover:to-eco-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all no-underline">
+                🚀 开始登记回收
+            </a>
+        </div>
+
+        <!-- 功能卡片 -->
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mt-12">
+            <a href="recycle.html" class="bg-white rounded-2xl p-5 text-center border border-eco-100 hover:shadow-md hover:border-eco-300 transition-all no-underline">
+                <div class="text-3xl mb-2">📝</div>
+                <p class="text-sm font-medium text-gray-700">登记回收</p>
+            </a>
+            <a href="ranking.html" class="bg-white rounded-2xl p-5 text-center border border-eco-100 hover:shadow-md hover:border-eco-300 transition-all no-underline">
+                <div class="text-3xl mb-2">🏆</div>
+                <p class="text-sm font-medium text-gray-700">积分排行</p>
+            </a>
+            <a href="records.html" class="bg-white rounded-2xl p-5 text-center border border-eco-100 hover:shadow-md hover:border-eco-300 transition-all no-underline">
+                <div class="text-3xl mb-2">📋</div>
+                <p class="text-sm font-medium text-gray-700">回收流水</p>
+            </a>
+            <a href="students.html" class="bg-white rounded-2xl p-5 text-center border border-eco-100 hover:shadow-md hover:border-eco-300 transition-all no-underline">
+                <div class="text-3xl mb-2">👥</div>
+                <p class="text-sm font-medium text-gray-700">学生管理</p>
+            </a>
+            <a href="carbon.html" class="bg-white rounded-2xl p-5 text-center border border-eco-100 hover:shadow-md hover:border-eco-300 transition-all no-underline">
+                <div class="text-3xl mb-2">📊</div>
+                <p class="text-sm font-medium text-gray-700">碳减排</p>
+            </a>
+        </div>
+    </main>
+
+    <footer class="text-center py-6 text-xs text-gray-400">🌿 瓶碳银行 v1.0 — 让每一次回收都被看见</footer>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/app.js"></script>
+</body>
+</html>

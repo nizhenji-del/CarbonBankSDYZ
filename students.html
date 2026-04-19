@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👥 学生管理 — 瓶碳银行</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <script>tailwind.config={theme:{extend:{colors:{eco:{50:'#f0fdf4',100:'#dcfce7',200:'#bbf7d0',300:'#86efac',400:'#4ade80',500:'#22c55e',600:'#16a34a',700:'#15803d',800:'#166534',900:'#14532d'}}}}}</script>
+</head>
+<body class="bg-gradient-to-br from-eco-50 via-white to-eco-50 min-h-screen">
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
+
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40 border-b border-eco-100">
+        <div class="max-w-6xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-3xl">🌿</span>
+                    <div><h1 class="text-xl font-bold text-eco-800 leading-tight">瓶碳银行</h1><p class="text-xs text-eco-600">PET瓶 × PP碗 双轨碳积分回收系统</p></div>
+                </div>
+                <div class="hidden sm:flex items-center gap-2 text-xs text-eco-600 bg-eco-50 px-3 py-1.5 rounded-full">
+                    <span class="w-2 h-2 bg-eco-500 rounded-full animate-pulse"></span><span>实时同步</span>
+                </div>
+            </div>
+            <nav class="flex gap-1 overflow-x-auto pb-1 -mb-3" id="tab-nav">
+                <a href="recycle.html"  data-tab="recycle"  class="tab-btn px-3 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors no-underline">📝 登记回收</a>
+                <a href="ranking.html"  data-tab="ranking"  class="tab-btn px-3 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors no-underline">🏆 排行榜</a>
+                <a href="records.html"  data-tab="records"  class="tab-btn px-3 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors no-underline">📋 回收流水</a>
+                <a href="students.html" data-tab="students" class="tab-btn px-3 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors no-underline">👥 学生管理</a>
+                <a href="carbon.html"   data-tab="carbon"   class="tab-btn px-3 py-2 text-sm font-medium whitespace-nowrap rounded-t-lg transition-colors no-underline">📊 碳减排</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- 添加学生表单 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-eco-100 p-6 animate-slide-up">
+                <h2 class="text-lg font-bold text-eco-800 mb-5 flex items-center gap-2">
+                    <span class="w-8 h-8 bg-eco-100 rounded-lg flex items-center justify-center text-lg">➕</span>
+                    添加学生
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">姓名</label>
+                        <input type="text" id="new-name" placeholder="请输入姓名" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-eco-400 focus:border-eco-400 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">班级</label>
+                        <input type="text" id="new-class" placeholder="如：高一(1)班" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-eco-400 focus:border-eco-400 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">学号</label>
+                        <input type="text" id="new-student-no" placeholder="请输入学号" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-eco-400 focus:border-eco-400 text-sm">
+                    </div>
+                    <button onclick="addStudent()" class="w-full py-2.5 bg-gradient-to-r from-eco-500 to-eco-600 hover:from-eco-600 hover:to-eco-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg active:scale-[0.98] transition-all text-sm">
+                        ✅ 添加学生
+                    </button>
+                </div>
+            </div>
+
+            <!-- 学生列表 -->
+            <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-eco-100 p-6 animate-slide-up" style="animation-delay:0.1s">
+                <h2 class="text-lg font-bold text-eco-800 mb-5 flex items-center gap-2">
+                    <span class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-lg">👥</span>
+                    学生列表
+                    <span class="text-xs font-normal text-gray-400 ml-auto" id="student-count">共 0 人</span>
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-100">
+                                <th class="text-left py-3 px-3 text-gray-500 font-medium">姓名</th>
+                                <th class="text-left py-3 px-3 text-gray-500 font-medium">班级</th>
+                                <th class="text-left py-3 px-3 text-gray-500 font-medium">学号</th>
+                                <th class="text-left py-3 px-3 text-gray-500 font-medium">添加时间</th>
+                            </tr>
+                        </thead>
+                        <tbody id="students-body">
+                            <tr><td colspan="4" class="text-center py-8 text-gray-400">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center py-6 text-xs text-gray-400">🌿 瓶碳银行 v1.0 — 让每一次回收都被看见</footer>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/students.js"></script>
+</body>
+</html>
